@@ -1,0 +1,6 @@
+(ns phel-google-sheets-example\main
+  (:use \Google_Service_Sheets))
+
+(def client
+  (doto (php/new Google_Client)
+    (php/-> setApplicationName "")))
