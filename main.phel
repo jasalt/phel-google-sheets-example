@@ -28,7 +28,7 @@
   [sheet-id range-str]
   (php->phel (php/-> (fetch-range sheet-id range-str) (getValues))))
 
-(defn map-2d-vector
+(defn tabular->map
   "Convert spreadsheet rows into vector of maps"
   [v]
   (let [colnames (first v)  # ["ID" "Username" "Email"]
@@ -36,8 +36,15 @@
     (map |(for [[i colname] :pairs colnames :reduce [entry {}]]
             (put entry (keyword colname) (get $ i))) values)))
 
+## (defn map->tabular [m]
+## TODO mapv https://github.com/clojure/clojure/blob/clojure-1.11.1/src/clj/clojure/core.clj#L6970
+## (let [rows] (map |(mapv (partial get $) column-names) merged-inventory-log))
+## )
+
 ## TODO create, update, delete
 ## https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api/#append-a-new-row
+
+
 
 (comment
   ## Public example sheet (read-only)
@@ -67,7 +74,7 @@
   (fetch-range-values sheet-id "Sheet2")
   ## => [["ID" "Username" "Email"] ["1" "erin" "e@example.com"] ["2" "joe" "e@example.com"] ["3" "alfred" "a@example.com"] ["4" "tim" "t@example.com"]]
 
-  (map-2d-vector (fetch-range-values sheet-id "Sheet2"))
+  (tabular->map (fetch-range-values sheet-id "Sheet2"))
   ## => [{:ID "1" :Username "erin" :Email "e@example.com"} {:ID "2" :Username "joe" :Email "e@example.com"} {:ID "3" :Username "alfred" :Email "a@example.com"} {:ID "4" :Username "tim" :Email "t@example.com"}]
 
   )
