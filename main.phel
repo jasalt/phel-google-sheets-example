@@ -10,17 +10,31 @@
     (php/-> (setAuthConfig keyfile))))
 
 (def sheets-service (php/new Google_Service_Sheets google-client))
-(def sheets (php/-> sheets-service spreadsheets))
+(def sheets        (php/-> sheets-service spreadsheets))
+(def sheets-values (php/-> sheets-service spreadsheets_values))
 
-(defn get-spreadsheet [sheet-id]
-  (php/-> sheets (get spreadsheet-id)))
+(defn get-sheet [sheet-id]
+  (php/-> sheets (get sheet-id)))
 
-(defn fetch-range "range-str uses format Sheet1!A1:F10" [sheet-id range-str]
-  (php/-> sheets (get spreadsheet-id)))
+(defn fetch-range
+  "Fetch range values returning spreadsheet object (read-only)
+   range-str uses format Sheet1!A1:F10"
+  [sheet-id range-str]
+  (php/-> sheets-values (get sheet-id range-str)))
+
+(defn fetch-range-values
+  "Fetch range values converting them to 2-dimensional Phel vector.
+   range-str uses format Sheet1!A1:F10"
+  [sheet-id range-str]
+  (php->phel (php/-> (fetch-range sheet-id range-str) (getValues))))
 
 (comment
-  (def spreadsheet (get-spreadsheet "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w"))
+  (def sheet-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w")
+  (def spreadsheet (get-sheet sheet-id))
   (php/var_dump spreadsheet)
+
+  (php/var_dump (fetch-range sheet-id "Sheet1"))
+  (fetch-range-values sheet-id "Sheet1")
   )
 
 ## NOTE: Feature request submitted for improved syntax:
