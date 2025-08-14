@@ -40,10 +40,12 @@
 ## https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api/#append-a-new-row
 
 (comment
-  # Public example sheet (read-only)
+  ## Public example sheet (read-only)
+  ## https://docs.google.com/spreadsheets/d/1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w/edit?usp=sharing
   (def sheet-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w")
 
   ## Sheet1:
+
   ##   A B
   ## 1|a|b|
   ## 2|c|d|
