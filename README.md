@@ -16,4 +16,5 @@ While there's [cli-skeleton](https://github.com/phel-lang/cli-skeleton/) and [we
   - https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api/
   - https://github.com/nidup/manipulate-google-sheets-api-in-php
 
+- https://github.com/googleapis/google-api-php-client-services
 - https://github.com/googleapis/google-api-php-client
