@@ -28,6 +28,23 @@
   [sheet-id range-str]
   (php->phel (php/-> (fetch-range sheet-id range-str) (getValues))))
 
+(defn map-2d-vector
+  "Convert spreadsheet rows into vector of maps"
+  [v]
+  (let [colnames (first v)  # ["ID" "Username" "Email"]
+        values (rest v)]    # [["1" "erin" "e@example.com"]...]
+    (for [v :in values :reduce [acc []]]
+      (push acc
+       (for [[i colname] :pairs colnames :reduce [entry {}]]
+        (put entry (keyword colname) (get v i))
+        )
+       )
+      )
+    )
+  )
+
+## TODO mapv https://github.com/clojure/clojure/blob/clojure-1.11.1/src/clj/clojure/core.clj#L6970
+
 (comment
   # Public example sheet (read-only)
   (def sheet-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w")
@@ -53,6 +70,10 @@
 
   (fetch-range-values sheet-id "Sheet2")
   ## => [["ID" "Username" "Email"] ["1" "erin" "e@example.com"] ["2" "joe" "e@example.com"] ["3" "alfred" "a@example.com"] ["4" "tim" "t@example.com"]]
+
+  (map-2d-vector (fetch-range-values sheet-id "Sheet2"))
+  ## => [{:ID "1" :Username "erin" :Email "e@example.com"} {:ID "2" :Username "joe" :Email "e@example.com"} {:ID "3" :Username "alfred" :Email "a@example.com"} {:ID "4" :Username "tim" :Email "t@example.com"}]
+
   )
 
 ## NOTE: Feature request submitted for improved syntax:
