@@ -32,16 +32,9 @@
   "Convert spreadsheet rows into vector of maps"
   [v]
   (let [colnames (first v)  # ["ID" "Username" "Email"]
-        values (rest v)]    # [["1" "erin" "e@example.com"]...]
-    (for [v :in values :reduce [acc []]]
-      (push acc
-       (for [[i colname] :pairs colnames :reduce [entry {}]]
-        (put entry (keyword colname) (get v i))
-        )
-       )
-      )
-    )
-  )
+        values   (rest v)]  # [["1" "erin" "e@example.com"]...]
+    (map |(for [[i colname] :pairs colnames :reduce [entry {}]]
+            (put entry (keyword colname) (get $ i))) values)))
 
 ## TODO mapv https://github.com/clojure/clojure/blob/clojure-1.11.1/src/clj/clojure/core.clj#L6970
 
