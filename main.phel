@@ -41,6 +41,35 @@
             []
             (apply map vector colls))))
 
+(comment
+  (deftest test-mapv
+    ;; Single collection
+    (is (= [1 2 3] (mapv + [1 2 3])))
+
+    ;; Two collections
+    (is (= [2 3 4] (mapv + [1 2 3] [1 1 1])))
+
+    ;; Three collections
+    (is (= [3 4 5] (mapv + [1 2 3] [1 1 1] [1 1 1])))
+
+    ;; Four collections
+    (is (= [4 5 6] (mapv + [1 2 3] [1 1 1] [1 1 1] [1 1 1])))
+
+    ## Should stop
+    (is (= [5 7] (mapv + [1 2 3] [4 5])))
+    (is (= [5 7] (mapv + [1 2] [4 5 6 7])))
+
+    (is (= [] (mapv + [] [1 2 3])))  # => [1]  !
+
+    (mapv + [1 2 3] [] [9])  # [10]  !
+
+    (is (= [4] (mapv + [1] [3])))
+
+    (= [1 "a" 2 "b"] (mapv |(str $ $) [1 2] ["a" "b"]))  # => ["11" "22"] ??
+
+    )
+)
+
 (defn tabular->map
   "Convert 2D vector of spreadsheet rows and column names on first row into
    vector of maps with column names as keyword keys."
