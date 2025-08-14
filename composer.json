@@ -1,5 +1,6 @@
 {
     "require": {
-        "google/apiclient": "^2.18"
+        "google/apiclient": "^2.18",
+        "phel-lang/phel-lang": "^0.19.1"
     }
 }
