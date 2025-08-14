@@ -4,18 +4,57 @@
 
 (def keyfile "service_account_key.json")
 
-(def client
+(def google-client
   (doto (php/new Google_Client)
     (php/-> (setScopes (to-php-array [(php/:: Google_Service_Sheets SPREADSHEETS)])))
     (php/-> (setAuthConfig keyfile))))
 
-(def service (php/new Google_Service_Sheets client))
+(def sheets-service (php/new Google_Service_Sheets google-client))
+(def sheets (php/-> sheets-service spreadsheets))
 
-(defn get-spreadsheet-by-id [sheet-id]
-  (let [sheets (php/-> service spreadsheets)]
-    (php/-> sheets (get spreadsheet-id))))
+(defn get-spreadsheet [sheet-id]
+  (php/-> sheets (get spreadsheet-id)))
+
+(defn fetch-range "range-str uses format Sheet1!A1:F10" [sheet-id range-str]
+  (php/-> sheets (get spreadsheet-id)))
 
 (comment
-  (def spreadsheet (get-spreadsheet-by-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w"))
+  ## Wondering if php/-> could support "builder pattern" style chaining of object attribute and method calls
+  ## Example (composer require google-apiclient):
+
+  (ns phel-google-sheets-example\main
+  (:use \Google_Client)
+  (:use \Google_Service_Sheets))
+
+  (def google-client
+    (php/new Google_Service_Sheets
+             (doto (php/new Google_Client)
+               (php/-> (setScopes (to-php-array [(php/:: Google_Service_Sheets SPREADSHEETS)])))
+               (php/-> (setAuthConfig keyfile)))))
+
+  (def sheets-service (php/new Google_Service_Sheets google-client))
+
+  ## Hyphotetical nested method / attribute call
+  ## equivalent to $sheet = $service->spreadsheets->get("my-spreadsheet-id");
+
+  (def sheet (php/-> sheets-service spreadsheets (get "my-spreadsheet-id")))  # Not possible at the moment
+
+  ## Current not as nice to read way being
+  (def sheet (php/-> (php/-> sheets-service spreadsheets) (get "my-spreadsheet-id")))
+
+  ## doto is not applicable as it calls always the object it initially is passed:
+
+  (doto (php/new Google_Service_Sheets
+                 (doto (php/new Google_Client)
+                   (php/-> (setScopes (to-php-array [(php/:: Google_Service_Sheets SPREADSHEETS)])))
+                   (php/-> (setAuthConfig keyfile))))
+    (php/-> spreadsheets)  # This should pass the Sheets object forward
+    (php/-> (get "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w")) # Error: Call to undefined method Google\Service\Sheets::get()
+    )
+  )
+
+(comment
+
+  (def spreadsheet (get-spreadsheet "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w"))
   (php/var_dump spreadsheet)
   )
