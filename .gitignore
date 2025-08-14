@@ -12,3 +12,5 @@ composer.lock
 .phel-repl-history
 gacela*.php
 phel-config-local.php
+
+service_account_key.json
