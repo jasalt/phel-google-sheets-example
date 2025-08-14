@@ -1,6 +1,21 @@
 (ns phel-google-sheets-example\main
+  (:use \Google_Client)
   (:use \Google_Service_Sheets))
+
+(def keyfile "service_account_key.json")
 
 (def client
   (doto (php/new Google_Client)
-    (php/-> setApplicationName "")))
+    (php/-> (setScopes (to-php-array [(php/:: Google_Service_Sheets SPREADSHEETS)])))
+    (php/-> (setAuthConfig keyfile))))
+
+(def service (php/new Google_Service_Sheets client))
+
+(defn get-spreadsheet-by-id [sheet-id]
+  (let [sheets (php/-> service spreadsheets)]
+    (php/-> sheets (get spreadsheet-id))))
+
+(comment
+  (def spreadsheet (get-spreadsheet-by-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w"))
+  (php/var_dump spreadsheet)
+  )
