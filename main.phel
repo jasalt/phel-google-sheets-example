@@ -2,7 +2,7 @@
   (:use \Google_Client)
   (:use \Google_Service_Sheets)
   (:use \Google_Service_Sheets_ValueRange)
-  )
+  (:use \Google_Service_Sheets_ClearValuesRequest))
 
 (def keyfile "service_account_key.json")
 
@@ -47,6 +47,12 @@
                       (php/-> (setValues (phel->php data))))
         options (phel->php {"valueInputOption" "USER_ENTERED"})]
     (php/-> sheets-values (update sheet-id range-str value-range options))))
+
+(defn clear-range
+  "Deletes range values in given range."
+  [sheet-id range-str]
+  (let [clear (php/new Google_Service_Sheets_ClearValuesRequest)]
+    (php/-> sheets-values (clear sheet-id range-str clear))))
 
 ## TODO PR waiting for https://github.com/phel-lang/phel-lang/pull/875
 (defn mapv
@@ -121,7 +127,7 @@
   ## => true
 
 
-  ### Sheet3 - Examples with append and update on empty sheet
+  ### Sheet3 - Examples with append and update on empty sheet (not publicly writable)
 
   (get-range sheet-id "Sheet3")
   ## => nil
@@ -141,6 +147,10 @@
 
   (get-range sheet-id "Sheet3")
   ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "9" "1.25"] ["Apple" "15" "2.45"]]
+
+  (clear-range sheet-id "Sheet3!A2:D3")
+  (get-range sheet-id "Sheet3")
+  ## => [["Fruit" "Quantity" "Price" "Total"]]
 
   )
 
