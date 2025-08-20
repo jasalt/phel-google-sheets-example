@@ -34,11 +34,19 @@
 (defn append-range
   "Append range values given as 2D vector appending to first empty rows starting
   from given range."
-  [sheet-id range-str data]            # data => [["a"] ["b"] ["c"]]
+  [sheet-id range-str data]
   (let [value-range (doto (php/new Google_Service_Sheets_ValueRange)
                       (php/-> (setValues (phel->php data))))
         options (phel->php {"valueInputOption" "USER_ENTERED"})]
     (php/-> sheets-values (append sheet-id range-str value-range options))))
+
+(defn update-range
+  "Update range values given as 2D vector in given range."
+  [sheet-id range-str data]
+  (let [value-range (doto (php/new Google_Service_Sheets_ValueRange)
+                      (php/-> (setValues (phel->php data))))
+        options (phel->php {"valueInputOption" "USER_ENTERED"})]
+    (php/-> sheets-values (update sheet-id range-str value-range options))))
 
 ## TODO PR waiting for https://github.com/phel-lang/phel-lang/pull/875
 (defn mapv
@@ -127,6 +135,12 @@
 
   (get-range sheet-id "Sheet3")
   ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "3" "1.25"] ["Apple" "5" "2.45"]]
+
+  (update-range sheet-id "Sheet3!A2" [["Banana" 9 1.25]
+                                      ["Apple" 15 2.45]])
+
+  (get-range sheet-id "Sheet3")
+  ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "9" "1.25"] ["Apple" "15" "2.45"]]
 
   )
 
