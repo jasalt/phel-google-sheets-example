@@ -54,7 +54,7 @@
   (let [clear (php/new Google_Service_Sheets_ClearValuesRequest)]
     (php/-> sheets-values (clear sheet-id range-str clear))))
 
-## TODO PR waiting for https://github.com/phel-lang/phel-lang/pull/875
+## TODO PR
 (defn mapv
   "Iterates through given collections element by element, passing set of elements
   at the same index in each collection as arguments for function f returning a
@@ -80,10 +80,6 @@
   (let [column-keywords (keys (first m))
         rows            (map |(mapv (partial get $) column-keywords) m)]
     (cons (map name column-keywords) rows)))
-
-
-## TODO create, update, delete
-## https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api/#append-a-new-row
 
 
 (comment
