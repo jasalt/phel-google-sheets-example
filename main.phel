@@ -4,6 +4,8 @@
   (:use \Google_Service_Sheets_ValueRange)
   (:use \Google_Service_Sheets_ClearValuesRequest))
 
+## NOTE: only single authentication session supported for now, could be fixed by
+##       moving ns defs into struct that could be passed to functions.
 (def keyfile "service_account_key.json")
 
 (def google-client
