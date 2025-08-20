@@ -16,19 +16,20 @@
 (defn get-sheet [sheet-id]
   (php/-> sheets (get sheet-id)))
 
-(defn fetch-range
-  "Fetch range values returning spreadsheet object (read-only)
-   range-str uses format Sheet1!A1:F10"
+(defn- get-range-object
+  "Get range values returning spreadsheet object (read-only)
+  Unused but available if range object is required for some reason
+  range-str uses format Sheet1!A1:F10"
   [sheet-id range-str]
   (php/-> sheets-values (get sheet-id range-str)))
 
-(defn fetch-range-values
-  "Fetch range values converting them to 2-dimensional Phel vector.
+(defn get-range
+  "Fetch range and get values converting them to 2-dimensional Phel vector.
    range-str uses format Sheet1!A1:F10"
   [sheet-id range-str]
-  (php->phel (php/-> (fetch-range sheet-id range-str) (getValues))))
+  (php->phel (php/-> (php/-> sheets-values (get sheet-id range-str)) (getValues))))
 
-## TODO PR
+## TODO PR waiting for https://github.com/phel-lang/phel-lang/pull/875
 (defn mapv
   "Iterates through given collections element by element, passing set of elements
   at the same index in each collection as arguments for function f returning a
@@ -41,35 +42,6 @@
             []
             (apply map vector colls))))
 
-(comment
-  (deftest test-mapv
-    ;; Single collection
-    (is (= [1 2 3] (mapv + [1 2 3])))
-
-    ;; Two collections
-    (is (= [2 3 4] (mapv + [1 2 3] [1 1 1])))
-
-    ;; Three collections
-    (is (= [3 4 5] (mapv + [1 2 3] [1 1 1] [1 1 1])))
-
-    ;; Four collections
-    (is (= [4 5 6] (mapv + [1 2 3] [1 1 1] [1 1 1] [1 1 1])))
-
-    ## Should stop
-    (is (= [5 7] (mapv + [1 2 3] [4 5])))
-    (is (= [5 7] (mapv + [1 2] [4 5 6 7])))
-
-    (is (= [] (mapv + [] [1 2 3])))  # => [1]  !
-
-    (mapv + [1 2 3] [] [9])  # [10]  !
-
-    (is (= [4] (mapv + [1] [3])))
-
-    (= [1 "a" 2 "b"] (mapv |(str $ $) [1 2] ["a" "b"]))  # => ["11" "22"] ??
-
-    )
-)
-
 (defn tabular->map
   "Convert 2D vector of spreadsheet rows and column names on first row into
    vector of maps with column names as keyword keys."
@@ -81,10 +53,9 @@
 
 (defn map->tabular [m]
   (let [column-keywords (keys (first m))
-        rows (map |(mapv (partial get $) column-keywords) m)]
+        rows            (map |(mapv (partial get $) column-keywords) m)]
     (cons (map name column-keywords) rows)))
 
-(push [])
 
 ## TODO create, update, delete
 ## https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api/#append-a-new-row
@@ -101,10 +72,10 @@
   ## 1|a|b|
   ## 2|c|d|
 
-  (php/var_dump (fetch-range sheet-id "Sheet1"))
+  (php/var_dump (get-range-object sheet-id "Sheet1"))
   ## => Outputs a lot of PHP object metadata
 
-  (fetch-range-values sheet-id "Sheet1")
+  (get-range sheet-id "Sheet1")
   ## => [["a" "b"] ["c" "d"]]
 
   ## Sheet2 (without col / row identifiers):
@@ -115,24 +86,19 @@
   ## 3  alfred   a@example.com
   ## 4  tim      t@example.com
 
-  (fetch-range-values sheet-id "Sheet2")
+  (get-range sheet-id "Sheet2")
   ## => [["ID" "Username" "Email"] ["1" "erin" "e@example.com"] ["2" "joe" "e@example.com"] ["3" "alfred" "a@example.com"] ["4" "tim" "t@example.com"]]
 
-  (tabular->map (fetch-range-values sheet-id "Sheet2"))
+  (tabular->map (get-range sheet-id "Sheet2"))
   ## => [{:ID "1" :Username "erin" :Email "e@example.com"} {:ID "2" :Username "joe" :Email "e@example.com"} {:ID "3" :Username "alfred" :Email "a@example.com"} {:ID "4" :Username "tim" :Email "t@example.com"}]
 
-  (map->tabular (tabular->map (fetch-range-values sheet-id "Sheet2")))
+  (map->tabular (tabular->map (get-range sheet-id "Sheet2")))
   ## => [["ID" "Username" "Email"] ["1" "erin" "e@example.com"] ["2" "joe" "e@example.com"] ["3" "alfred" "a@example.com"] ["4" "tim" "t@example.com"]]
 
-  (let [tabular-data (fetch-range-values sheet-id "Sheet2")]
+  (let [tabular-data (get-range sheet-id "Sheet2")]
     (= tabular-data
        (map->tabular (tabular->map tabular-data))))
   ## => true
-
-
-  (map->tabular mapped-data)
-  (def mapped-data (-> (fetch-range-values sheet-id "Sheet2")
-                       tabular->map))
 
   )
 
