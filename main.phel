@@ -1,6 +1,8 @@
 (ns phel-google-sheets-example\main
   (:use \Google_Client)
-  (:use \Google_Service_Sheets))
+  (:use \Google_Service_Sheets)
+  (:use \Google_Service_Sheets_ValueRange)
+  )
 
 (def keyfile "service_account_key.json")
 
@@ -28,6 +30,15 @@
    range-str uses format Sheet1!A1:F10"
   [sheet-id range-str]
   (php->phel (php/-> (php/-> sheets-values (get sheet-id range-str)) (getValues))))
+
+(defn append-range
+  "Append range values given as 2D vector appending to first empty rows starting
+  from given range."
+  [sheet-id range-str data]            # data => [["a"] ["b"] ["c"]]
+  (let [value-range (doto (php/new Google_Service_Sheets_ValueRange)
+                      (php/-> (setValues (phel->php data))))
+        options (phel->php {"valueInputOption" "USER_ENTERED"})]
+    (php/-> sheets-values (append sheet-id range-str value-range options))))
 
 ## TODO PR waiting for https://github.com/phel-lang/phel-lang/pull/875
 (defn mapv
@@ -66,7 +77,7 @@
   ## https://docs.google.com/spreadsheets/d/1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w/edit?usp=sharing
   (def sheet-id "1V4HgE8AIw37TmECLJH-te9iA2VMlRSh5ZrkVUzel69w")
 
-  ## Sheet1:
+  ### Sheet1 - Basic reading example:
 
   ##   A B
   ## 1|a|b|
@@ -78,7 +89,8 @@
   (get-range sheet-id "Sheet1")
   ## => [["a" "b"] ["c" "d"]]
 
-  ## Sheet2 (without col / row identifiers):
+
+  ## Sheet2 - Converting tabular data to maps example:
 
   ## ID Username Email
   ## 1  erin     e@example.com
@@ -99,6 +111,22 @@
     (= tabular-data
        (map->tabular (tabular->map tabular-data))))
   ## => true
+
+
+  ### Sheet3 - Examples with append and update on empty sheet
+
+  (get-range sheet-id "Sheet3")
+  ## => nil
+
+  (append-range sheet-id "Sheet3" [["Fruit" "Quantity" "Price"]])
+  (get-range sheet-id "Sheet3")
+  ## => [["Fruit" "Quantity" "Price" "Total"]]
+
+  (append-range sheet-id "Sheet3" [["Banana" 3 1.25]
+                                   ["Apple" 5 2.45]])
+
+  (get-range sheet-id "Sheet3")
+  ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "3" "1.25"] ["Apple" "5" "2.45"]]
 
   )
 
