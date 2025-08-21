@@ -56,19 +56,6 @@
   (let [clear (php/new Google_Service_Sheets_ClearValuesRequest)]
     (php/-> sheets-values (clear sheet-id range-str clear))))
 
-## TODO PR
-(defn mapv
-  "Iterates through given collections element by element, passing set of elements
-  at the same index in each collection as arguments for function f returning a
-  vector. Stops when the collection with least items is exhausted. For single
-  collection works like the map function."
-  [f & colls]
-  (if (= 1 (count colls))
-    (reduce (fn [v x] (push v (f x))) [] (first colls))
-    (reduce (fn [v args] (push v (apply f args)))
-            []
-            (apply map vector colls))))
-
 (defn tabular->map
   "Convert 2D vector of spreadsheet rows and column names on first row into
    vector of maps with column names as keyword keys."
@@ -80,7 +67,7 @@
 
 (defn map->tabular [m]
   (let [column-keywords (keys (first m))
-        rows            (map |(mapv (partial get $) column-keywords) m)]
+        rows            (map |(map (partial get $) column-keywords) m)]
     (cons (map name column-keywords) rows)))
 
 
