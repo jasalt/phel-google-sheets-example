@@ -116,21 +116,21 @@
 
   (append-range sheet-id "Sheet3" [["Fruit" "Quantity" "Price"]])
   (get-range sheet-id "Sheet3")
-  ## => [["Fruit" "Quantity" "Price" "Total"]]
+  ## => [["Fruit" "Quantity" "Price"]]
 
   (append-range sheet-id "Sheet3" [["Banana" 3 1.25]
                                    ["Apple" 5 2.45]])
 
   (get-range sheet-id "Sheet3")
-  ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "3" "1.25"] ["Apple" "5" "2.45"]]
+  ## => [["Fruit" "Quantity" "Price"] ["Banana" "3" "1.25"] ["Apple" "5" "2.45"]]
 
   (update-range sheet-id "Sheet3!A2" [["Banana" 9 1.25]
                                       ["Apple" 15 2.45]])
 
   (get-range sheet-id "Sheet3")
-  ## => [["Fruit" "Quantity" "Price" "Total"] ["Banana" "9" "1.25"] ["Apple" "15" "2.45"]]
+  ## => [["Fruit" "Quantity" "Price"] ["Banana" "9" "1.25"] ["Apple" "15" "2.45"]]
 
   (clear-range sheet-id "Sheet3!A2:D3")
   (get-range sheet-id "Sheet3")
-  ## => [["Fruit" "Quantity" "Price" "Total"]]
+  ## => [["Fruit" "Quantity" "Price"]]
   )
