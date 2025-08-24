@@ -12,8 +12,8 @@
     (php/-> (setAuthConfig keyfile))))
 
 (def sheets-service (php/new Google_Service_Sheets google-client))
-(def sheets        (php/-> sheets-service spreadsheets))
-(def sheets-values (php/-> sheets-service spreadsheets_values))
+(def sheets         (php/-> sheets-service spreadsheets))
+(def sheets-values  (php/-> sheets-service spreadsheets_values))
 
 (defn get-sheet [sheet-id]
   (php/-> sheets (get sheet-id)))
@@ -29,7 +29,7 @@
   "Fetch range and get values converting them to 2-dimensional Phel vector.
    range-str uses format Sheet1!A1:F10"
   [sheet-id range-str]
-  (php->phel (php/-> (php/-> sheets-values (get sheet-id range-str)) (getValues))))
+  (php->phel (php/-> sheets-values (get sheet-id range-str) (getValues))))
 
 (defn append-range
   "Append range values given as 2D vector appending to first empty rows starting
@@ -133,74 +133,4 @@
   (clear-range sheet-id "Sheet3!A2:D3")
   (get-range sheet-id "Sheet3")
   ## => [["Fruit" "Quantity" "Price" "Total"]]
-
-  )
-
-
-(comment
-
-  ## Testing https://github.com/phel-lang/phel-lang/pull/884
-
-  (def keyfile "service_account_key.json")
-
-  (def google-client
-    (doto (php/new Google_Client)
-      (php/-> (setScopes (to-php-array [(php/:: Google_Service_Sheets SPREADSHEETS)])))
-      (php/-> (setAuthConfig keyfile))))
-
-  #### The old syntax
-
-  (php/->
-   (php/->
-    (php/-> (php/new Google_Service_Sheets google-client) spreadsheets_values)
-    (get sheet-id "Sheet1!A1:B2"))
-   (getValues))
-
-  ## <PHP-Array [<PHP-Array ["a", "b"]>, <PHP-Array ["c", "d"]>]>
-
-  (compile '(php/->
-             (php/->
-              (php/-> (php/new Google_Service_Sheets google-client) spreadsheets_values)
-              (get sheet-id "Sheet1!A1:B2"))
-             (getValues)))
-
-  ## =>
-  ## (function() {
-  ##   \$target_1013 = (function() {
-  ##     \$target_1014 = (function() {
-  ##       \$target_1015 = (new \\Google_Service_Sheets(\\Phel::getDefinition(\"phel_google_sheets_example\\\\main\", \"google-client\")));
-  ##       return \$target_1015->spreadsheets_values;
-  ##     })();
-  ##     return \$target_1014->get(\\Phel::getDefinition(\"phel_google_sheets_example\\\\main\", \"sheet-id\"), \"Sheet1!A1:B2\");
-  ##   })();
-  ##   return \$target_1013->getValues();
-  ## })();
-
-
-  #### The new syntax:
-
-  (php/-> (php/new Google_Service_Sheets google-client)
-          spreadsheets_values
-          (get sheet-id "Sheet1!A1:B2")
-          (getValues))
-
-  ## ParseError: syntax error, unexpected token "return"
-
-  (compile '(php/-> (php/new Google_Service_Sheets google-client)
-                    spreadsheets_values
-                    (get sheet-id "Sheet1!A1:B2")
-                    (getValues)))
-
-  ## =>
-  ## (function() {
-  ##   \$target_1001 = (function() {
-  ##     \$target_1002 = (function() {
-  ##       \$target_1003 = (new \\Google_Service_Sheets(\\Phel::getDefinition(\"phel_google_sheets_example\\\\main\", \"google-client\")));
-  ##       return \$target_1003->spreadsheets_values;
-  ##     })();;
-  ##     return \$target_1002->get(\\Phel::getDefinition(\"phel_google_sheets_example\\\\main\", \"sheet-id\"), \"Sheet1!A1:D4\");
-  ##   })();;
-  ##   return \$target_1001->getValues();
-  ## })();
-
   )
